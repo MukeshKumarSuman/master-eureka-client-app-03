@@ -45,7 +45,7 @@ public class PaymentController extends ExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/demo")
+    @GetMapping("/demo1")
     public String demo() {
         return "Demo";
     }
