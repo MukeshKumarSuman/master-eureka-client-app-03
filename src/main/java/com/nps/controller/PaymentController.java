@@ -1,25 +1,27 @@
 package com.nps.controller;
 
-import com.nps.dto.ErrorResponse;
 import com.nps.dto.PaymentRequest;
+import com.nps.dto.StatementResponse;
 import com.nps.exception.BadRequest;
 import com.nps.exception.Conflict;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 @RestController
-@RequestMapping("/payment")
-public class PaymentController {
+//@RequestMapping("/v1")
+public class PaymentController extends ExceptionHandler {
 
     private static  final Logger logger = LoggerFactory.getLogger(PaymentController.class);
-    @PostMapping
+    @PostMapping("/payment")
     void initializePayment(@RequestBody PaymentRequest request) {
         logger.info("Request Received: {}", request);
         int amount = request.getAmount();
@@ -32,17 +34,20 @@ public class PaymentController {
         }
     }
 
-    @ExceptionHandler(BadRequest.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleBadRequest(BadRequest ex) {
-        logger.error("Exception occurred while processing payment {}", ex);
-        return new ErrorResponse(String.valueOf(HttpStatus.BAD_REQUEST.value()), "BadRequest", ex.getMsg());
+    @GetMapping("/statement")
+    public ResponseEntity<StatementResponse> getStatement() {
+        StatementResponse response = new StatementResponse();
+        LocalDateTime localDateTime = LocalDateTime.now();
+        response.setId(UUID.randomUUID());
+        response.setPaymentDueDate(localDateTime.toLocalDate());
+        logger.info("Statement localDateTime: {}", localDateTime);
+        logger.info("Statement response: {}", response);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @ExceptionHandler(Conflict.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleConflict(Conflict ex) {
-        logger.error("Exception occurred while processing payment {}", ex);
-        return new ErrorResponse(String.valueOf(HttpStatus.CONFLICT.value()), "Conflict", ex.getMsg());
+    @GetMapping("/demo")
+    public String demo() {
+        return "Demo";
     }
+
 }
