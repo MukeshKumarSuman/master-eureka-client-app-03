@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 @RestController
@@ -37,10 +40,13 @@ public class PaymentController extends ExceptionHandler {
     @GetMapping("/statement")
     public ResponseEntity<StatementResponse> getStatement() {
         StatementResponse response = new StatementResponse();
-        LocalDateTime localDateTime = LocalDateTime.now();
+        LocalDateTime localDateTime = LocalDateTime.now().minusHours(18);
+        OffsetDateTime offsetDateTime = OffsetDateTime.of(localDateTime, ZoneOffset.UTC);
+        String isoDateTime = offsetDateTime.format(DateTimeFormatter.ISO_DATE_TIME);
         response.setId(UUID.randomUUID());
-        response.setPaymentDueDate(localDateTime.toLocalDate());
-        logger.info("Statement localDateTime: {}", localDateTime);
+        response.setPaymentDueDate(offsetDateTime);
+        logger.info("UTC  offsetDateTime: {}", offsetDateTime);
+        logger.info("ISO_DATE_TIME localDateTime: {}", isoDateTime);
         logger.info("Statement response: {}", response);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
